@@ -1,0 +1,48 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <title>Socket.IO chat</title>
+    <link rel="stylesheet" href="/stylesheets/bootstrap.css"/>
+  </head>
+  <body>
+    <div class="card">
+      <div id="card-messages"></div>
+    </div>
+
+    <form class="fixed-bottom" action="">
+      <div class="input-group">
+        <input id="m" class="form-control" placeholder="Type here..." autocomplete="off">
+        <span class="input-group-btn">
+          <button class="btn btn-secondary" type="submit">Send</button>
+        </span>
+      </div>
+    </form>
+    <script src="/scripts/socket.io.js"></script>
+    <script src="/scripts/jquery.js"></script>
+    <script src="/scripts/tether.js"></script>
+    <script src="/scripts/bootstrap.js"></script>
+    <script>
+      $(function(){
+        var chatH = '<%= chatName %>';
+        var socket = io('http://localhost:3000');
+        $('form').submit(function(e){
+          e.preventDefault();
+          socket.emit('chat message', { chatHandle: chatH, message: $('#m').val() });
+          $('#m').val('');
+          return false;
+        });
+        socket.on('chat message', function(data){
+          var cardColor;
+          if (chatH != data.chatHandle)
+            cardColor = 'card-success'
+          else
+            cardColor = 'card-info'
+          $('#card-messages').append(
+            $('<div class="card card-inverse ' + cardColor + ' mb-3 text-center">').append(
+              $('<div class="card-block">').append($('<blockquote class="card-blockquote">')
+            .append($('<p>').text(data.chatHandle + ': ' + data.message)))));
+        })
+      });
+    </script>
+  </body>
+</html>
