@@ -4,6 +4,7 @@ var app = express();
 var bodyParser = require('body-parser');
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
+var dateFormat = require('dateformat');
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -38,7 +39,7 @@ io.on('connection', function(socket){
     console.log('A user disconnected');
   });
   socket.on('chat message', function(data){
-    console.log('msg:' + data);
+    data.date = dateFormat(new Date(), "mmmm dS, yyyy, h:MM TT");
     io.emit('chat message', data);
   })
 })

@@ -5,8 +5,8 @@
     <link rel="stylesheet" href="/stylesheets/bootstrap.css"/>
   </head>
   <body>
-    <div class="card">
-      <div id="card-messages"></div>
+    <div class="container mb-5">
+      <div id="messages"></div>
     </div>
 
     <form class="fixed-bottom" action="">
@@ -32,15 +32,23 @@
           return false;
         });
         socket.on('chat message', function(data){
-          var cardColor;
+          var messageColor;
           if (chatH != data.chatHandle)
-            cardColor = 'card-success'
+            messageColor = 'success'
           else
-            cardColor = 'card-info'
-          $('#card-messages').append(
-            $('<div class="card card-inverse ' + cardColor + ' mb-3 text-center">').append(
-              $('<div class="card-block">').append($('<blockquote class="card-blockquote">')
-            .append($('<p>').text(data.chatHandle + ': ' + data.message)))));
+            messageColor = 'info'
+          $('#messages').append(
+            $('<div class="row rounded m-2">').append(
+              $('<div class="col-3 p-1">').append(
+                $('<div class="text-' + messageColor + '">').text(data.chatHandle)
+              ).append(
+                $('<div class="text-muted">').text(data.date)
+              )
+            ).append(
+              $('<div class="col-9 bg-' + messageColor + ' text-white p-1 pl-4 align-self-center">').text(data.message)
+            )
+          );
+          $("html, body").animate({ scrollTop: $(document).height() }, "slow");
         })
       });
     </script>
