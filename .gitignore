@@ -1,5 +1,8 @@
 # Created by https://www.gitignore.io/api/node
 
+### Git Merge Files ###
+*.orig
+
 ### Node ###
 # Logs
 logs

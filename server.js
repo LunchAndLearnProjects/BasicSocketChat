@@ -5,6 +5,10 @@ var bodyParser = require('body-parser');
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var dateFormat = require('dateformat');
+var mongoose = require('mongoose');
+var Message = require('./models/message');
+
+mongoose.connect('mongodb://localhost/basicsocketchat', { useMongoClient: true });
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -39,7 +43,20 @@ io.on('connection', function(socket){
     console.log('A user disconnected');
   });
   socket.on('chat message', function(data){
+    var newMessage;
+    console.log('msg:' + data);
     data.date = dateFormat(new Date(), "mmmm dS, yyyy, h:MM TT");
+    newMessage = new Message({
+      value: data.message,
+      date: data.date,
+      username: data.chatHandle
+    });
+    newMessage.save(function(err) {
+      if (err)
+        console.log(err);
+      else
+        console.log('message saved');
+    });
     io.emit('chat message', data);
   })
 })
