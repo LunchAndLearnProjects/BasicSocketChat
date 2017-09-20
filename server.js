@@ -33,8 +33,17 @@ app.get('/chat', function(req, res){
   var name = req.query.name;
   if (name === undefined)
     res.redirect('/');
-  else
-    res.render('index', {chatName: name});
+  else{
+    Message.find().sort({ date: 1 }).exec(function(err, messageList){
+      if (err)
+        res.send(err);
+      
+      messageList.forEach(function(msg){
+        msg.formattedDate = dateFormat(msg.date, "mmmm dS, yyyy, h:MM TT");
+      });
+      res.render('index', {chatName: name, messages: messageList});
+    });
+  }
 })
 
 io.on('connection', function(socket){
@@ -44,11 +53,12 @@ io.on('connection', function(socket){
   });
   socket.on('chat message', function(data){
     var newMessage;
+    var now = new Date()
     console.log('msg:' + data);
-    data.date = dateFormat(new Date(), "mmmm dS, yyyy, h:MM TT");
+    data.date = dateFormat(now, "mmmm dS, yyyy, h:MM TT");
     newMessage = new Message({
       value: data.message,
-      date: data.date,
+      date: now,
       username: data.chatHandle
     });
     newMessage.save(function(err) {
