@@ -6,8 +6,10 @@ var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var dateFormat = require('dateformat');
 var mongoose = require('mongoose');
-var Message = require('./models/message');
 
+mongoose.Promise = global.Promise;
+
+var Message = require('./models/message');
 mongoose.connect('mongodb://localhost/basicsocketchat', { useMongoClient: true });
 
 app.use(bodyParser.json());
@@ -48,18 +50,38 @@ app.get('/chat', function(req, res){
 
 io.on('connection', function(socket){
   console.log('A user connected');
+  
+  socket.on('load messages', function(){
+    console.log('load messages');
+    Message.find().sort({ date: 1 }).exec(function(err, messages){
+      var messageList = [];
+      if (err) 
+        console.log(err);
+      else {
+        messages.forEach(function(msg){
+          var message = {
+            username: msg.username,
+            formattedDate: dateFormat(msg.date, "mmmm dS, yyyy, h:MM TT"),
+            value: msg.value
+          };
+          messageList.push(message);
+        });
+        socket.emit('loaded messages', messageList);
+      }
+    });
+  });
   socket.on('disconnect', function(){
     console.log('A user disconnected');
   });
   socket.on('chat message', function(data){
     var newMessage;
     var now = new Date()
-    console.log('msg:' + data);
-    data.date = dateFormat(now, "mmmm dS, yyyy, h:MM TT");
+    console.log('msg:' + JSON.stringify(data));
+    data.formattedDate = dateFormat(now, "mmmm dS, yyyy, h:MM TT");
     newMessage = new Message({
-      value: data.message,
+      value: data.value,
       date: now,
-      username: data.chatHandle
+      username: data.username
     });
     newMessage.save(function(err) {
       if (err)

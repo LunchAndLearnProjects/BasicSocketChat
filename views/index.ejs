@@ -50,7 +50,7 @@
         var socket = io('http://localhost:3000');
         $('form').submit(function(e){
           e.preventDefault();
-          socket.emit('chat message', { chatHandle: chatH, message: $('#m').val() });
+          socket.emit('chat message', { username: chatH, value: $('#m').val() });
           $('#m').val('');
           return false;
         });
@@ -63,12 +63,12 @@
           $('#messages').append(
             $('<div class="row rounded m-2">').append(
               $('<div class="col-3 p-1">').append(
-                $('<div class="text-' + messageColor + '">').text(data.chatHandle)
+                $('<div class="text-' + messageColor + '">').text(data.username)
               ).append(
-                $('<div class="text-muted">').text(data.date)
+                $('<div class="text-muted">').text(data.formattedDate)
               )
             ).append(
-              $('<div class="col-9 bg-' + messageColor + ' text-white p-1 pl-4 align-self-center">').text(data.message)
+              $('<div class="col-9 bg-' + messageColor + ' text-white p-1 pl-4 align-self-center">').text(data.value)
             )
           );
           $("html, body").animate({ scrollTop: $(document).height() }, "slow");
